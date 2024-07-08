@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.IO Chat</title>
+  <style>
+    body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    #form, #login-form, #register-form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+    #input, #login-username, #register-username, #register-password, #login-password { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
+    #input:focus, #login-username:focus, #register-username:focus, #register-password:focus, #login-password:focus { outline: none; }
+    #form > button, #login-form > button, #register-form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+    #messages { list-style-type: none; margin: 0; padding: 0; }
+    #messages > li { padding: 0.5rem 1rem; }
+    #messages > li:nth-child(odd) { background: #efefef; color:black }
+  </style>
+</head>
+<body>
+  <div id="register" style="display:block;">
+    <form id="register-form">
+      <label for="register-username">Username:</label>
+      <input id="register-username" type="text" autocomplete="off" required />
+      <label for="register-password">Password:</label>
+      <input id="register-password" type="password" autocomplete="off" required />
+      <button type="submit">Register</button>
+      <div id="register-error" style="color: red; display: none;">Registration failed. Username might be taken or other error.</div>
+    </form>
+    <button id="show-login">Already have an account? Login</button>
+  </div>
+  <div id="login" style="display:none;">
+    <form id="login-form">
+      <label for="login-username">Username:</label>
+      <input id="login-username" type="text" autocomplete="off" required />
+      <label for="login-password">Password:</label>
+      <input id="login-password" type="password" autocomplete="off" required />
+      <button type="submit">Login</button>
+      <div id="login-error" style="color: red; display: none;">Login failed. Check your username and password.</div>
+    </form>
+    <button id="show-register">Don't have an account? Register</button>
+  </div>
+  <div id="chat" style="display:none;">
+    <ul id="messages"></ul>
+    <form id="form" action="">
+      <input id="input" autocomplete="off" /><button>Send</button>
+    </form>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    var register = document.getElementById('register');
+    var login = document.getElementById('login');
+    var chat = document.getElementById('chat');
+    var registerForm = document.getElementById('register-form');
+    var loginForm = document.getElementById('login-form');
+    var usernameInput = document.getElementById('register-username');
+    var passwordInput = document.getElementById('register-password');
+    var loginUsernameInput = document.getElementById('login-username');
+    var loginPasswordInput = document.getElementById('login-password');
+    var messages = document.getElementById('messages');
+    var chatForm = document.getElementById('form');
+    var chatInput = document.getElementById('input');
+
+    document.getElementById('show-login').addEventListener('click', function() {
+      register.style.display = 'none';
+      login.style.display = 'block';
+    });
+
+    document.getElementById('show-register').addEventListener('click', function() {
+      login.style.display = 'none';
+      register.style.display = 'block';
+    });
+
+    registerForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var username = usernameInput.value;
+      var password = passwordInput.value;
+      socket.emit('register', { username: username, password: password });
+    });
+
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var username = loginUsernameInput.value;
+      var password = loginPasswordInput.value;
+      socket.emit('login', { username: username, password: password });
+    });
+
+    socket.on('register success', function(userId) {
+      register.style.display = 'none';
+      login.style.display = 'none';
+      chat.style.display = 'block';
+      localStorage.setItem('userId', userId);
+    });
+
+    socket.on('register failure', function() {
+      document.getElementById('register-error').style.display = 'block';
+    });
+
+    socket.on('login success', function(userId) {
+      register.style.display = 'none';
+      login.style.display = 'none';
+      chat.style.display = 'block';
+      localStorage.setItem('userId', userId);
+      socket.emit('get messages'); // Carga los mensajes históricos
+    });
+
+    socket.on('login failure', function() {
+      document.getElementById('login-error').style.display = 'block';
+    });
+
+    chatForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var content = chatInput.value;
+      var userId = localStorage.getItem('userId');
+      if (content && userId) {
+        socket.emit('chat message', { content: content, userId: userId });
+        chatInput.value = '';
+      }
+    });
+
+    socket.on('chat message', function({ content, username, timestamp }) {
+      var item = document.createElement('li');
+      item.textContent = `${username} [${new Date(timestamp).toLocaleTimeString()}]: ${content}`;
+      messages.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+
+    socket.on('load messages', function(messagess) {
+      messagess.forEach(({ content, username, timestamp }) => {
+        var item = document.createElement('li');
+        item.textContent = `${username} [${new Date(timestamp).toLocaleTimeString()}]: ${content}`;
+      
+          messages.appendChild(item)
+        
+      });
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+  </script>
+</body>
+</html>
