@@ -13,7 +13,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      height: 90vh;
     }
     #register, #login {
       width: 100%;
@@ -27,6 +27,7 @@
     #chat {
       height: 95%;
       width: 100%;
+      border-radius: 1rem;
     }
     form {
       display: flex;
@@ -131,16 +132,21 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      width: 90vw;
+      margin: 0 auto;
     }
     #content-message {
       width: 94vw;
-      height: 90vh;
-      margin: 0 auto;
-      overflow-y: scroll;
+  height: 90vh;
+  margin: 0 auto;
+  overflow-y: auto; /* Cambiado de scroll a auto */
+  display: flex;
+  flex-direction: column-reverse;
+  
     }
     #h3-chat {
       font-size: small;
-      margin: .4rem;
+      margin: .2rem;
     }
   </style>
 </head>
@@ -231,6 +237,7 @@
       login.style.display = 'none';
       chat.style.display = 'block';
       localStorage.setItem('userId', userId);
+      contentMessage.scrollTop = contentMessage.scrollHeight; // Scroll automático al final
     });
 
     socket.on('register failure', function() {
@@ -243,6 +250,7 @@
       chat.style.display = 'block';
       localStorage.setItem('userId', userId);
       socket.emit('get messages'); // Carga los mensajes históricos
+      contentMessage.scrollTop = contentMessage.scrollHeight; // Scroll automático al final
     });
 
     socket.on('login failure', function() {
@@ -264,6 +272,7 @@
       item.textContent = `${username} [${new Date(timestamp).toLocaleTimeString()}]: ${content}`;
       messages.appendChild(item);
       contentMessage.scrollTop = contentMessage.scrollHeight; // Scroll automático al final
+      contentMessage.scrollTop = document.body.scrollHeight; // Scroll automático al final
     });
 
     socket.on('load messages', function(messagesBack) {
