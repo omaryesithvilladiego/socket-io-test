@@ -1,7 +1,3 @@
-
-// Reemplaza esto con tu URI de conexión
-
-
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
