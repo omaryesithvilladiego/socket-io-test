@@ -1,11 +1,8 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
- 
   <title>Socket.IO Chat</title>
   <style>
     body {
@@ -29,7 +26,6 @@
     }
     #chat {
       height: 95%;
-      overflow-y: scroll;
       width: 100%;
     }
     form {
@@ -102,12 +98,12 @@
       height: 3rem;
       box-sizing: border-box;
       backdrop-filter: blur(10px);
+      justify-content: center;
     }
     #input {
       border: none;
       flex-grow: 1;
-      margin: 0.25rem;
-      height: 2rem;
+      height: 0.5rem;
     }
     #input:focus {
       outline: none;
@@ -133,6 +129,18 @@
     }
     #content-input-send {
       display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #content-message {
+      width: 94vw;
+      height: 90vh;
+      margin: 0 auto;
+      overflow-y: scroll;
+    }
+    #h3-chat {
+      font-size: small;
+      margin: .4rem;
     }
   </style>
 </head>
@@ -162,13 +170,18 @@
     <button id="show-register">Don't have an account? Register</button>
   </div>
   <div id="chat" style="display:none;">
-    <ul id="messages"></ul>
+    <div id="content-message">
+      <ul id="messages"></ul>
+    </div>
     <form id="form" action="">
-      <div id="content-input-send">      <input id="input" autocomplete="off" /><button type="submit">Send</button>
+      <div id="content-input-send">
+        <h3 id="h3-chat">Only<span>Chat ; )</span></h3>
+        <input id="input" autocomplete="off" />
+        <button type="submit">Send</button>
       </div>
     </form>
   </div>
- 
+
   <script src="/socket.io/socket.io.js"></script>
   <script>
     var socket = io();
@@ -184,6 +197,7 @@
     var messages = document.getElementById('messages');
     var chatForm = document.getElementById('form');
     var chatInput = document.getElementById('input');
+    var contentMessage = document.getElementById('content-message');
 
     document.getElementById('show-login').addEventListener('click', function() {
       register.style.display = 'none';
@@ -247,7 +261,7 @@
       var item = document.createElement('li');
       item.textContent = `${username} [${new Date(timestamp).toLocaleTimeString()}]: ${content}`;
       messages.appendChild(item);
-      chat.scrollTo(0, document.body.scrollHeight);
+      contentMessage.scrollTop = contentMessage.scrollHeight; // Scroll automático al final
     });
 
     socket.on('load messages', function(messagesBack) {
@@ -256,7 +270,7 @@
         item.textContent = `${username} [${new Date(timestamp).toLocaleTimeString()}]: ${content}`;
         messages.appendChild(item);
       });
-      chat.scrollTo(0, document.body.scrollHeight);
+      contentMessage.scrollTop = contentMessage.scrollHeight; // Scroll automático al final
     });
 
     window.addEventListener('load', function() {
@@ -264,4 +278,4 @@
     });
   </script>
 </body>
-</html
+</html>
