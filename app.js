@@ -9,7 +9,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const mongoURI = 'mongodb+srv://omar:080898@cluster0.y97fe3h.mongodb.net/chat?retryWrites=true&w=majority&appName=Cluster0'; 
+const mongoURI = 'mongodb+srv://omar:omaromar@cluster0.y97fe3h.mongodb.net/chats?retryWrites=true&w=majority&appName=Cluster0'; 
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log('MongoDB connection error:', err));
